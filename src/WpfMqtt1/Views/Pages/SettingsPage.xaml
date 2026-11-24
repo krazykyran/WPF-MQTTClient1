@@ -209,6 +209,76 @@
                 </StackPanel>
             </ui:CardControl>
 
+            <!-- Keyboard Shortcuts -->
+            <ui:TextBlock
+                Margin="0,0,0,10"
+                FontTypography="Subtitle"
+                Text="Keyboard Shortcuts" />
+
+            <ui:Card Margin="0,0,0,20" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+1 .. 4" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Switch between Client, Brokers, History, Settings" />
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+F" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Focus search / filter box on active page" />
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+Enter" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Publish message from payload editor" />
+                        </DockPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+S" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Save broker profile (Brokers page)" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+R" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Start / Stop SQLite session recording (Client)" />
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+P" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Pause / Resume live message feed (Client)" />
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,8">
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="Ctrl+L" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Clear live message feed (Client)" />
+                        </DockPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Padding="7,2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4">
+                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="F5" />
+                            </Border>
+                            <ui:TextBlock VerticalAlignment="Center" FontTypography="Caption" Text="Refresh recorded sessions (History)" />
+                        </DockPanel>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
             <!-- About -->
             <ui:TextBlock
                 Margin="0,0,0,10"

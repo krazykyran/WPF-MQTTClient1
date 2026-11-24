@@ -18,12 +18,14 @@ public sealed class AppPathsService : IAppPathsService
         SettingsFilePath = Path.Combine(AppDataDirectory, "settings.json");
         BrokersFilePath = Path.Combine(AppDataDirectory, "brokers.json");
         HistoryDatabasePath = Path.Combine(AppDataDirectory, "history.db");
+        ErrorLogFilePath = Path.Combine(AppDataDirectory, "logs", "errors.log");
     }
 
     public string AppDataDirectory { get; }
     public string SettingsFilePath { get; }
     public string BrokersFilePath { get; }
     public string HistoryDatabasePath { get; }
+    public string ErrorLogFilePath { get; }
 
     public void EnsureAppDataDirectoryExists()
     {

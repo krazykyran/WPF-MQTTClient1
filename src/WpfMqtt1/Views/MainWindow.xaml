@@ -14,6 +14,7 @@
     d:DataContext="{d:DesignInstance Type=local:MainWindow, IsDesignTimeCreatable=False}"
     xmlns:local="clr-namespace:WpfMqtt1.Views"
     ExtendsContentIntoTitleBar="True"
+    Icon="pack://application:,,,/WpfMqtt1;component/Assets/app-icon.ico"
     WindowBackdropType="Mica"
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
@@ -31,7 +32,7 @@
             Grid.Row="0"
             Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="Pulse24" />
+                <ui:ImageIcon Source="pack://application:,,,/WpfMqtt1;component/Assets/app-icon.png" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 

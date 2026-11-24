@@ -56,11 +56,12 @@
                 </Grid>
 
                 <ui:TextBox
+                    x:Name="BrokerSearchBox"
                     Grid.Row="1"
                     Margin="0,0,0,12"
                     ClearButtonEnabled="True"
                     Icon="{ui:SymbolIcon Search20}"
-                    PlaceholderText="Filter brokers..."
+                    PlaceholderText="Filter brokers (Ctrl+F)..."
                     Text="{Binding ViewModel.SearchText, UpdateSourceTrigger=PropertyChanged}" />
 
                 <ui:ListView

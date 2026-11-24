@@ -66,6 +66,7 @@
                 </Grid>
 
                 <ui:TextBox
+                    x:Name="SessionSearchBox"
                     Grid.Row="1"
                     Margin="0,0,0,8"
                     ClearButtonEnabled="True"
@@ -301,12 +302,13 @@
 
                 <!-- Search Input -->
                 <ui:TextBox
+                    x:Name="MessageSearchBox"
                     Grid.Row="1"
                     Margin="0,0,0,8"
                     ClearButtonEnabled="True"
                     Icon="{ui:SymbolIcon Search20}"
                     IsEnabled="{Binding ViewModel.HasSelectedSession}"
-                    PlaceholderText="Search topic or payload..."
+                    PlaceholderText="Search topic or payload (Ctrl+F)..."
                     Text="{Binding ViewModel.MessageSearchText, UpdateSourceTrigger=PropertyChanged}" />
 
                 <!-- Direction & Topic Filters -->

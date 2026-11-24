@@ -6,6 +6,7 @@ public interface IAppPathsService
     string SettingsFilePath { get; }
     string BrokersFilePath { get; }
     string HistoryDatabasePath { get; }
+    string ErrorLogFilePath { get; }
 
     void EnsureAppDataDirectoryExists();
 }

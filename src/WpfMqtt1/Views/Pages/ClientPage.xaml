@@ -389,7 +389,7 @@
                             Margin="0,0,8,0"
                             ClearButtonEnabled="True"
                             Icon="{ui:SymbolIcon Search20}"
-                            PlaceholderText="Search topic or payload..."
+                            PlaceholderText="Search topic or payload (Ctrl+F)..."
                             Text="{Binding ViewModel.FeedSearchText, UpdateSourceTrigger=PropertyChanged}" />
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal">

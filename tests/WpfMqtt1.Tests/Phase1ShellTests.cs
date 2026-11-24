@@ -27,6 +27,7 @@ public sealed class Phase1ShellTests
         Assert.NotNull(provider.GetRequiredService<IContentDialogService>());
 
         Assert.NotNull(provider.GetRequiredService<IAppPathsService>());
+        Assert.NotNull(provider.GetRequiredService<IErrorLogService>());
         Assert.NotNull(provider.GetRequiredService<ISecretProtectorService>());
         Assert.NotNull(provider.GetRequiredService<IAppThemeService>());
         Assert.NotNull(provider.GetRequiredService<ISettingsService>());

@@ -34,6 +34,7 @@ public partial class App : Application
 
         // Core application services
         services.AddSingleton<IAppPathsService, AppPathsService>();
+        services.AddSingleton<IErrorLogService, ErrorLogService>();
         services.AddSingleton<ISecretProtectorService, SecretProtectorService>();
         services.AddSingleton<IAppThemeService, AppThemeService>();
         services.AddSingleton<ISettingsService, SettingsService>();
@@ -64,17 +65,69 @@ public partial class App : Application
 
     private async void OnStartup(object sender, StartupEventArgs e)
     {
+        AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
         await HostInstance.StartAsync();
     }
 
     private async void OnExit(object sender, ExitEventArgs e)
     {
+        AppDomain.CurrentDomain.UnhandledException -= OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException -= OnUnobservedTaskException;
+
         await HostInstance.StopAsync();
         HostInstance.Dispose();
     }
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        // Placeholder hook for structured logging / user notification in later phases.
+        LogError("DispatcherUnhandledException", e.Exception);
+
+        try
+        {
+            var snackbar = Services.GetService<ISnackbarService>();
+            if (snackbar?.GetSnackbarPresenter() is not null)
+            {
+                snackbar.Show(
+                    "Unexpected Error",
+                    e.Exception.GetBaseException().Message,
+                    Wpf.Ui.Controls.ControlAppearance.Danger,
+                    new Wpf.Ui.Controls.SymbolIcon(Wpf.Ui.Controls.SymbolRegular.ErrorCircle24),
+                    TimeSpan.FromSeconds(6));
+            }
+        }
+        catch
+        {
+            // Ignore secondary snackbar errors during exception handling.
+        }
+
+        e.Handled = true;
+    }
+
+    private void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+        {
+            LogError("AppDomainUnhandledException", ex);
+        }
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        LogError("UnobservedTaskException", e.Exception);
+        e.SetObserved();
+    }
+
+    private static void LogError(string source, Exception exception)
+    {
+        try
+        {
+            Services.GetService<IErrorLogService>()?.LogException(source, exception);
+        }
+        catch
+        {
+            // Never throw while logging an unhandled exception.
+        }
     }
 }

@@ -1,13 +1,14 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Wpf.Ui.Abstractions.Controls;
 using WpfMqtt1.Models;
 using WpfMqtt1.ViewModels;
 
 namespace WpfMqtt1.Views.Pages;
 
-public partial class HistoryPage : INavigableView<HistoryViewModel>
+public partial class HistoryPage : INavigableView<HistoryViewModel>, IPageShortcutHandler
 {
     public HistoryViewModel ViewModel { get; }
 
@@ -17,6 +18,34 @@ public partial class HistoryPage : INavigableView<HistoryViewModel>
         DataContext = this;
         InitializeComponent();
         Loaded += OnLoaded;
+    }
+
+    public bool FocusSearch()
+    {
+        if (ViewModel.HasSelectedSession && MessageSearchBox.IsEnabled)
+        {
+            MessageSearchBox.Focus();
+            MessageSearchBox.SelectAll();
+            return true;
+        }
+
+        SessionSearchBox.Focus();
+        SessionSearchBox.SelectAll();
+        return true;
+    }
+
+    public bool HandleShortcut(Key key, ModifierKeys modifiers)
+    {
+        if (modifiers == ModifierKeys.None && key == Key.F5)
+        {
+            if (ViewModel.RefreshCommand.CanExecute(null))
+            {
+                ViewModel.RefreshCommand.Execute(null);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
