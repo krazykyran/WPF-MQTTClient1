@@ -1,0 +1,110 @@
+name: Build and Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Windows Binaries
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 and .NET 10 SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Determine release tag and version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.tag }}" } else { "${{ github.ref_name }}" }
+          $ver = $tag.TrimStart('v')
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Building release $tag (version $ver)"
+
+      - name: Restore & Run Unit Tests
+        shell: pwsh
+        run: |
+          dotnet test tests/WpfMqtt1.Tests/WpfMqtt1.Tests.csproj -c Release --filter "FullyQualifiedName!~LayoutRegressionTests" --verbosity minimal
+
+      - name: Publish compact single-file binaries (win-x64 & win-arm64)
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          $ver = "${{ steps.version.outputs.version }}"
+          $assetsDir = "release-assets"
+          New-Item -ItemType Directory -Force -Path $assetsDir | Out-Null
+
+          foreach ($rid in @("win-x64", "win-arm64")) {
+            Write-Host "Publishing $rid..."
+            dotnet publish src/WpfMqtt1/WpfMqtt1.csproj `
+              -c Release `
+              -r $rid `
+              --self-contained false `
+              -p:PublishSingleFile=true `
+              -p:IncludeNativeLibrariesForSelfExtract=true `
+              -p:DebugType=None `
+              -p:Version=$ver `
+              -p:AssemblyVersion="$ver.0" `
+              -p:FileVersion="$ver.0" `
+              -o "dist/$rid"
+
+            $dest = Join-Path $assetsDir "WpfMqtt1-$tag-$rid.exe"
+            Copy-Item "dist/$rid/WpfMqtt1.exe" $dest -Force
+          }
+
+          $checksumLines = Get-ChildItem $assetsDir -Filter "*.exe" | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          }
+          $checksumLines | Set-Content -Path (Join-Path $assetsDir "SHA256SUMS.txt") -Encoding UTF8
+
+          Get-ChildItem $assetsDir | Format-Table Name, Length -AutoSize
+          Get-Content (Join-Path $assetsDir "SHA256SUMS.txt")
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: WpfMqtt1 ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          body: |
+            ## WpfMqtt1 ${{ steps.version.outputs.tag }}
+
+            Modern Windows 11 desktop MQTT client built with C#, .NET 8 WPF, **WPF-UI** (Fluent Design with Mica/Acrylic), **MQTTnet v5**, and embedded **SQLite** session history.
+
+            ### Downloads (Compact Single-File Executables)
+            - **`WpfMqtt1-${{ steps.version.outputs.tag }}-win-x64.exe`** — 64-bit Intel / AMD Windows 10 & 11
+            - **`WpfMqtt1-${{ steps.version.outputs.tag }}-win-arm64.exe`** — ARM64 Windows 11 (Snapdragon / Apple Silicon Parallels)
+            - **`SHA256SUMS.txt`** — SHA-256 verification checksums
+
+            ### Prerequisites
+            - Requires the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (or newer — configured with major roll-forward so .NET 8, 9, 10, and 11 Desktop Runtimes all work).
+
+            ### Highlights
+            - **Brokers & Security:** TCP (`mqtt://`), TLS (`mqtts://`), WebSocket (`ws://`), WebSocket Secure (`wss://`), MQTT v5.0 / v3.1.1 / v3.1.0, Windows DPAPI encrypted credentials, self-signed certificate toggle, and Test Connection handshake
+            - **Live MQTT Workspace:** Multi-topic subscriptions (`+` / `#` wildcards), batched virtualized message feed, search/filter/pause, Text/JSON/Hex/Base64 payload inspector, and multi-format publisher (`Ctrl+Enter`)
+            - **Offline SQLite History:** Toggleable and auto-record SQLite (`WAL`) sessions, sortable offline `DataGrid` (Date/Time & Topic asc/desc), and CSV/JSON export
+            - **Windows 11 Polish:** Mica/Acrylic backdrop, System/Light/Dark themes, custom Fluent icon, keyboard shortcuts, and window placement persistence
+          files: |
+            release-assets/WpfMqtt1-${{ steps.version.outputs.tag }}-win-x64.exe
+            release-assets/WpfMqtt1-${{ steps.version.outputs.tag }}-win-arm64.exe
+            release-assets/SHA256SUMS.txt

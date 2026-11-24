@@ -8,6 +8,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationTitle>WpfMqtt1</ApplicationTitle>
+    <Product>WpfMqtt1</Product>
+    <Description>Modern Windows 11 WPF MQTT Client with SQLite session history</Description>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
