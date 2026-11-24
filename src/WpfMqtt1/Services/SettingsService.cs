@@ -67,7 +67,7 @@ public sealed class SettingsService : ISettingsService
             _pathsService.EnsureAppDataDirectoryExists();
             var tempPath = _pathsService.SettingsFilePath + ".tmp";
 
-            await using (var stream = File.Create(tempPath))
+            using (var stream = File.Create(tempPath))
             {
                 await JsonSerializer.SerializeAsync(stream, Current, JsonOptions, cancellationToken)
                     .ConfigureAwait(false);

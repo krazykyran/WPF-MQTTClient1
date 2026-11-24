@@ -1,6 +1,6 @@
 # WpfMqtt1 — Windows 11 WPF MQTT Client
 
-A modern Windows 11 desktop MQTT client built with C#, .NET 11 WPF, **WPF-UI** (Fluent Design with Mica/Acrylic), **MQTTnet v5**, and embedded **SQLite** session history.
+A modern Windows 11 desktop MQTT client built with C#, .NET 8 WPF, **WPF-UI** (Fluent Design with Mica/Acrylic), **MQTTnet v5**, and embedded **SQLite** session history.
 
 Connect to MQTT brokers over TCP, TLS, or WebSockets, manage DPAPI-encrypted broker profiles, subscribe to multiple topics with wildcards, inspect and publish lossless Text/JSON/Hex/Base64 payloads, and record sessions to SQLite for offline browsing, sorting, and CSV/JSON export.
 
@@ -55,12 +55,12 @@ Connect to MQTT brokers over TCP, TLS, or WebSockets, manage DPAPI-encrypted bro
 
 | Area | Technology |
 | --- | --- |
-| Runtime / UI | `.NET 11` (`net11.0-windows`), WPF |
+| Runtime / UI | `.NET 8` (`net8.0-windows`, with major roll-forward to .NET 9/10/11), WPF |
 | Fluent Design | [WPF-UI](https://wpfui.lepo.co/) (`4.3.0`) & `WPF-UI.DependencyInjection` |
 | MQTT Engine | [MQTTnet](https://github.com/dotnet/MQTTnet) (`5.2.0.1603`) |
-| MVVM & DI | `CommunityToolkit.Mvvm` (`8.4.2`), `Microsoft.Extensions.Hosting` (`11.0.0`) |
+| MVVM & DI | `CommunityToolkit.Mvvm` (`8.4.2`), `Microsoft.Extensions.Hosting` (`8.0.1`) |
 | Credential Storage | Windows DPAPI (`System.Security.Cryptography.ProtectedData`) |
-| Offline Storage | `Microsoft.Data.Sqlite` (`11.0.0`, WAL mode) |
+| Offline Storage | `Microsoft.Data.Sqlite` (`8.0.11`, WAL mode) |
 | Testing | `xUnit` (`WpfMqtt1.Tests`) |
 
 ---
@@ -69,7 +69,7 @@ Connect to MQTT brokers over TCP, TLS, or WebSockets, manage DPAPI-encrypted bro
 
 ### Prerequisites
 - Windows 11 (or Windows 10 1809+ for fallback surfaces)
-- [.NET 11 SDK](https://dotnet.microsoft.com/) (`11.0.100` or later)
+- [.NET 8 SDK](https://dotnet.microsoft.com/) (or newer, e.g. .NET 11 SDK)
 
 ### Clone & Run
 ```powershell

@@ -112,7 +112,7 @@ public sealed class BrokerProfileStore : IBrokerProfileStore
 
         try
         {
-            await using var stream = File.OpenRead(_pathsService.BrokersFilePath);
+            using var stream = File.OpenRead(_pathsService.BrokersFilePath);
             var loaded = await JsonSerializer.DeserializeAsync<List<BrokerProfile>>(stream, JsonOptions, cancellationToken)
                 .ConfigureAwait(false);
             return loaded ?? [];
@@ -128,7 +128,7 @@ public sealed class BrokerProfileStore : IBrokerProfileStore
         _pathsService.EnsureAppDataDirectoryExists();
         var tempPath = _pathsService.BrokersFilePath + ".tmp";
 
-        await using (var stream = File.Create(tempPath))
+        using (var stream = File.Create(tempPath))
         {
             await JsonSerializer.SerializeAsync(stream, profiles, JsonOptions, cancellationToken)
                 .ConfigureAwait(false);

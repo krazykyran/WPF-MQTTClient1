@@ -10,7 +10,7 @@ public interface IErrorLogService
 
 public sealed class ErrorLogService(IAppPathsService pathsService) : IErrorLogService
 {
-    private readonly Lock _fileLock = new();
+    private readonly object _fileLock = new();
 
     public void LogException(string source, Exception exception)
     {

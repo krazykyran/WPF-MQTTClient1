@@ -292,7 +292,7 @@
                         Margin="0,4,0,0"
                         Appearance="Secondary"
                         FontTypography="Caption"
-                        Text="{Binding ViewModel.AppVersion, StringFormat=Version {0} • .NET 11 WPF + WPF-UI + MQTTnet v5}" />
+                        Text="{Binding ViewModel.AppVersion, StringFormat=Version {0} • .NET 8 WPF + WPF-UI + MQTTnet v5}" />
                 </StackPanel>
             </ui:Card>
         </StackPanel>

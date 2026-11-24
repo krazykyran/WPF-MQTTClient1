@@ -185,7 +185,7 @@ public partial class MainWindow : INavigationWindow
             }
 
             s.IsWindowMaximized = WindowState == WindowState.Maximized;
-            _settingsService.SaveAsync().GetAwaiter().GetResult();
+            Task.Run(() => _settingsService.SaveAsync()).GetAwaiter().GetResult();
         }
         catch
         {
