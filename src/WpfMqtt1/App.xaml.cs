@@ -37,6 +37,7 @@ public partial class App : Application
         services.AddSingleton<IAppThemeService, AppThemeService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IBrokerProfileStore, BrokerProfileStore>();
+        services.AddSingleton<IPayloadCodecService, PayloadCodecService>();
         services.AddSingleton<IMqttClientService, MqttClientService>();
 
         // Shell

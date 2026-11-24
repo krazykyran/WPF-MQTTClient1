@@ -1,0 +1,234 @@
+<UserControl
+    x:Class="WpfMqtt1.Views.Controls.PayloadInspectorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    x:Name="Root"
+    d:DesignHeight="500"
+    d:DesignWidth="360"
+    mc:Ignorable="d">
+
+    <ui:Card
+        Padding="14"
+        VerticalAlignment="Stretch"
+        VerticalContentAlignment="Stretch">
+        <Grid>
+            <!-- Empty State -->
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Visibility="{Binding Message, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
+                <ui:SymbolIcon
+                    Margin="0,0,0,10"
+                    HorizontalAlignment="Center"
+                    FontSize="32"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    Symbol="DocumentSearch24" />
+                <ui:TextBlock
+                    HorizontalAlignment="Center"
+                    Appearance="Secondary"
+                    FontTypography="BodyStrong"
+                    Text="No message selected" />
+                <ui:TextBlock
+                    MaxWidth="240"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Center"
+                    Appearance="Tertiary"
+                    FontTypography="Caption"
+                    Text="Click any message in the feed to inspect its metadata and payload in Text, JSON, Hex, or Base64."
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- Active Message Inspector -->
+            <Grid Visibility="{Binding Message, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Header: Direction + Topic + Copy Topic -->
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Grid.Column="0"
+                        Margin="0,0,8,0"
+                        Padding="7,2"
+                        VerticalAlignment="Center"
+                        Background="{Binding Message.Direction, ElementName=Root, Converter={StaticResource DirectionToBrushConverter}, ConverterParameter=Bg}"
+                        CornerRadius="4">
+                        <ui:TextBlock
+                            FontTypography="Caption"
+                            FontWeight="SemiBold"
+                            Foreground="{Binding Message.Direction, ElementName=Root, Converter={StaticResource DirectionToBrushConverter}}"
+                            Text="{Binding Message.DirectionArrow, ElementName=Root}" />
+                    </Border>
+
+                    <ui:TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontTypography="BodyStrong"
+                        Text="{Binding Message.Topic, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis"
+                        ToolTip="{Binding Message.Topic, ElementName=Root}" />
+
+                    <ui:Button
+                        Grid.Column="2"
+                        Margin="6,0,0,0"
+                        Padding="6,4"
+                        Click="OnCopyTopicClick"
+                        Content="{Binding CopyTopicText, ElementName=Root}"
+                        FontSize="11"
+                        Icon="{ui:SymbolIcon Copy16}"
+                        ToolTip="Copy topic" />
+                </Grid>
+
+                <!-- Metadata Badges -->
+                <WrapPanel Grid.Row="1" Margin="0,0,0,10" Orientation="Horizontal">
+                    <Border
+                        Margin="0,0,6,4"
+                        Padding="6,2"
+                        Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="4">
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding Message.TimestampFullDisplay, ElementName=Root}" />
+                    </Border>
+                    <Border
+                        Margin="0,0,6,4"
+                        Padding="6,2"
+                        Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="4">
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding Message.QosLabel, ElementName=Root}" />
+                    </Border>
+                    <Border
+                        Margin="0,0,6,4"
+                        Padding="6,2"
+                        Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="4">
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding Message.SizeDisplay, ElementName=Root}" />
+                    </Border>
+                    <Border
+                        Margin="0,0,6,4"
+                        Padding="6,2"
+                        Background="{DynamicResource SystemFillColorCautionBackgroundBrush}"
+                        CornerRadius="4"
+                        Visibility="{Binding Message.Retain, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:TextBlock
+                            FontTypography="Caption"
+                            FontWeight="SemiBold"
+                            Text="RETAINED" />
+                    </Border>
+                    <Border
+                        Margin="0,0,6,4"
+                        Padding="6,2"
+                        Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="4"
+                        Visibility="{Binding Message.ContentType, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}}">
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding Message.ContentType, ElementName=Root}" />
+                    </Border>
+                </WrapPanel>
+
+                <!-- Format Tabs + Actions -->
+                <Grid Grid.Row="2" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <ui:Button
+                            x:Name="TextFormatButton"
+                            Margin="0,0,4,0"
+                            Padding="8,4"
+                            Click="OnFormatButtonClick"
+                            Content="Text"
+                            FontSize="12"
+                            Tag="Text" />
+                        <ui:Button
+                            x:Name="JsonFormatButton"
+                            Margin="0,0,4,0"
+                            Padding="8,4"
+                            Click="OnFormatButtonClick"
+                            Content="JSON"
+                            FontSize="12"
+                            Tag="Json" />
+                        <ui:Button
+                            x:Name="HexFormatButton"
+                            Margin="0,0,4,0"
+                            Padding="8,4"
+                            Click="OnFormatButtonClick"
+                            Content="Hex"
+                            FontSize="12"
+                            Tag="Hex" />
+                        <ui:Button
+                            x:Name="Base64FormatButton"
+                            Padding="8,4"
+                            Click="OnFormatButtonClick"
+                            Content="Base64"
+                            FontSize="12"
+                            Tag="Base64" />
+                    </StackPanel>
+
+                    <ui:Button
+                        Grid.Column="1"
+                        Padding="8,4"
+                        Click="OnCopyPayloadClick"
+                        Content="{Binding CopyPayloadText, ElementName=Root}"
+                        FontSize="12"
+                        Icon="{ui:SymbolIcon Copy20}"
+                        ToolTip="Copy formatted payload" />
+                </Grid>
+
+                <!-- Format Warning (e.g., invalid JSON or binary bytes in Text mode) -->
+                <ui:InfoBar
+                    Grid.Row="3"
+                    Margin="0,0,0,8"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Message="{Binding WarningMessage, ElementName=Root}"
+                    Severity="Warning"
+                    Visibility="{Binding WarningMessage, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                <!-- Payload Content Viewer -->
+                <TextBox
+                    x:Name="PayloadTextBox"
+                    Grid.Row="4"
+                    Padding="10"
+                    AcceptsReturn="True"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    FontFamily="Cascadia Mono, Consolas, Courier New"
+                    FontSize="12.5"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    HorizontalScrollBarVisibility="Auto"
+                    IsReadOnly="True"
+                    Text="{Binding FormattedPayload, ElementName=Root, Mode=OneWay}"
+                    TextWrapping="{Binding EffectiveTextWrapping, ElementName=Root}"
+                    VerticalContentAlignment="Top"
+                    VerticalScrollBarVisibility="Auto" />
+            </Grid>
+        </Grid>
+    </ui:Card>
+</UserControl>

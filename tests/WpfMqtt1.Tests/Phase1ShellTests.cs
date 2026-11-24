@@ -30,6 +30,7 @@ public sealed class Phase1ShellTests
         Assert.NotNull(provider.GetRequiredService<IAppThemeService>());
         Assert.NotNull(provider.GetRequiredService<ISettingsService>());
         Assert.NotNull(provider.GetRequiredService<IBrokerProfileStore>());
+        Assert.NotNull(provider.GetRequiredService<IPayloadCodecService>());
         Assert.NotNull(provider.GetRequiredService<IMqttClientService>());
 
         Assert.NotNull(provider.GetRequiredService<MainWindowViewModel>());

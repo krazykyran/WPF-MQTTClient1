@@ -46,6 +46,8 @@ public sealed class LayoutRegressionTests
                     app.Resources["NullToVisibilityConverter"] = new WpfMqtt1.Converters.NullToVisibilityConverter();
                     app.Resources["InverseBooleanConverter"] = new WpfMqtt1.Converters.InverseBooleanConverter();
                     app.Resources["DoubleToIntConverter"] = new WpfMqtt1.Converters.DoubleToIntConverter();
+                    app.Resources["DirectionToBrushConverter"] = new WpfMqtt1.Converters.DirectionToBrushConverter();
+                    app.Resources["HexToBrushConverter"] = new WpfMqtt1.Converters.HexToBrushConverter();
                 }
 
                 var services = new ServiceCollection();
@@ -93,6 +95,14 @@ public sealed class LayoutRegressionTests
                 scrollViewer.ScrollToEnd();
                 scrollViewer.UpdateLayout();
                 maxScrollOffsetReached = scrollViewer.VerticalOffset;
+
+                // Also verify ClientPage loads cleanly and constrains to viewport
+                window.Navigate(typeof(ClientPage));
+                app.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                var clientPage = provider.GetRequiredService<ClientPage>();
+                clientPage.UpdateLayout();
+                Assert.True(clientPage.ActualHeight > 0 && clientPage.ActualHeight < windowHeight,
+                    $"Expected ClientPage height ({clientPage.ActualHeight}) to fit inside window ({windowHeight}).");
 
                 window.Close();
                 app.Dispatcher.InvokeShutdown();

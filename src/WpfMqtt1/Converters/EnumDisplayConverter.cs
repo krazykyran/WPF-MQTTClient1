@@ -35,6 +35,10 @@ public sealed class EnumDisplayConverter : IValueConverter
             PayloadFormat.Hex => "Hex",
             PayloadFormat.Base64 => "Base64",
 
+            MessageDirectionFilter.All => "All Directions",
+            MessageDirectionFilter.Inbound => "Inbound (↓)",
+            MessageDirectionFilter.Outbound => "Outbound (↑)",
+
             int qos when parameter is string p && p.Equals("QoS", StringComparison.OrdinalIgnoreCase) => qos switch
             {
                 0 => "QoS 0 — At most once",
