@@ -1,0 +1,49 @@
+<Page
+    x:Class="WpfMqtt1.Views.Pages.HistoryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfMqtt1.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="History"
+    d:DataContext="{d:DesignInstance Type=local:HistoryPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="640"
+    d:DesignWidth="1000"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ScrollViewer.CanContentScroll="False"
+    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+    mc:Ignorable="d">
+
+    <StackPanel MaxWidth="900">
+        <ui:TextBlock
+            Margin="0,0,0,4"
+            FontTypography="Title"
+            Text="History" />
+        <ui:TextBlock
+            Margin="0,0,0,20"
+            Appearance="Secondary"
+            Text="Browse recorded SQLite sessions offline, filter messages, inspect payloads, and export to CSV or JSON." />
+
+        <ui:Card Padding="20">
+            <StackPanel>
+                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                    <ui:SymbolIcon
+                        Margin="0,0,10,0"
+                        FontSize="22"
+                        Symbol="Database24" />
+                    <ui:TextBlock
+                        VerticalAlignment="Center"
+                        FontTypography="Subtitle"
+                        Text="Coming in Phase 4" />
+                </StackPanel>
+                <ui:TextBlock
+                    Appearance="Secondary"
+                    Text="{Binding ViewModel.StatusMessage}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </ui:Card>
+    </StackPanel>
+</Page>

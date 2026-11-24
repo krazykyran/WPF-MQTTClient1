@@ -1,0 +1,223 @@
+<Page
+    x:Class="WpfMqtt1.Views.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfMqtt1.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Settings"
+    d:DataContext="{d:DesignInstance Type=local:SettingsPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="760"
+    d:DesignWidth="1000"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ScrollViewer.CanContentScroll="False"
+    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="900" Margin="0,0,8,24">
+            <ui:TextBlock
+                Margin="0,0,0,4"
+                FontTypography="Title"
+                Text="Settings" />
+            <ui:TextBlock
+                Margin="0,0,0,20"
+                Appearance="Secondary"
+                Text="Personalize the Windows 11 appearance, configure client defaults, and manage local storage." />
+
+            <!-- Appearance -->
+            <ui:TextBlock
+                Margin="0,0,0,10"
+                FontTypography="Subtitle"
+                Text="Appearance" />
+
+            <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Color24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="App theme" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Follow your Windows 11 system theme or switch manually between Light and Dark." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox
+                    MinWidth="210"
+                    ItemsSource="{Binding ViewModel.AvailableThemes}"
+                    SelectedItem="{Binding ViewModel.SelectedTheme, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDisplayConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,24" Icon="{ui:SymbolIcon Window24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Window backdrop" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Choose Windows 11 Mica, Acrylic, or solid window surface." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox
+                    MinWidth="210"
+                    ItemsSource="{Binding ViewModel.AvailableBackdrops}"
+                    SelectedItem="{Binding ViewModel.SelectedBackdrop, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDisplayConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ui:CardControl>
+
+            <!-- Client Defaults -->
+            <ui:TextBlock
+                Margin="0,0,0,10"
+                FontTypography="Subtitle"
+                Text="Client Defaults" />
+
+            <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Send24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Default publish QoS" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Pre-selected Quality of Service level when publishing messages." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox
+                    MinWidth="210"
+                    ItemsSource="{Binding ViewModel.AvailableQosLevels}"
+                    SelectedItem="{Binding ViewModel.DefaultPublishQos, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDisplayConverter}, ConverterParameter=QoS}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,24" Icon="{ui:SymbolIcon Code24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Default payload format" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Initial payload editor format on the Client page." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox
+                    MinWidth="210"
+                    ItemsSource="{Binding ViewModel.AvailablePayloadFormats}"
+                    SelectedItem="{Binding ViewModel.DefaultPayloadFormat, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDisplayConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ui:CardControl>
+
+            <!-- Recording & Storage -->
+            <ui:TextBlock
+                Margin="0,0,0,10"
+                FontTypography="Subtitle"
+                Text="Session Recording &amp; Storage" />
+
+            <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Record24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Auto-record sessions on connect" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Automatically start logging messages to SQLite whenever you connect to a broker." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding ViewModel.AutoRecordOnConnect, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Layer24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Live feed memory limit" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="Maximum number of messages kept in the live view (SQLite logs retain full history)." />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox
+                    MinWidth="160"
+                    ItemsSource="{Binding ViewModel.AvailableBufferLimits}"
+                    SelectedItem="{Binding ViewModel.MaxInMemoryMessages, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat={}{0:N0} messages}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon FolderOpen24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="Application data folder" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding ViewModel.AppDataDirectory}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button
+                    Command="{Binding ViewModel.OpenDataFolderCommand}"
+                    Content="Open Folder"
+                    Icon="{ui:SymbolIcon Open20}" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,24" Icon="{ui:SymbolIcon Database24}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock FontTypography="BodyStrong" Text="SQLite session history database" />
+                        <ui:TextBlock
+                            Appearance="Secondary"
+                            FontTypography="Caption"
+                            Text="{Binding ViewModel.HistoryDatabasePath}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:TextBlock
+                    VerticalAlignment="Center"
+                    Appearance="Secondary"
+                    FontTypography="Caption"
+                    Text="{Binding ViewModel.DatabaseSizeDisplay}" />
+            </ui:CardControl>
+
+            <!-- About -->
+            <ui:TextBlock
+                Margin="0,0,0,10"
+                FontTypography="Subtitle"
+                Text="About" />
+
+            <ui:Card Padding="16">
+                <StackPanel>
+                    <ui:TextBlock FontTypography="BodyStrong" Text="WpfMqtt1 — Windows 11 MQTT Client" />
+                    <ui:TextBlock
+                        Margin="0,4,0,0"
+                        Appearance="Secondary"
+                        FontTypography="Caption"
+                        Text="{Binding ViewModel.AppVersion, StringFormat=Version {0} • .NET 11 WPF + WPF-UI + MQTTnet v5}" />
+                </StackPanel>
+            </ui:Card>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

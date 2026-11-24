@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net11.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationTitle>WpfMqtt1</ApplicationTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WpfMqtt1.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
+    <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <PackageReference Include="WPF-UI.DependencyInjection" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
