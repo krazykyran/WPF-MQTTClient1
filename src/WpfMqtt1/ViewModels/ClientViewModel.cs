@@ -33,6 +33,7 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
     private readonly IBrokerProfileStore _brokerProfileStore;
     private readonly ISettingsService _settingsService;
     private readonly IPayloadCodecService _payloadCodec;
+    private readonly ISessionRecorderService _sessionRecorder;
     private readonly ISnackbarService _snackbarService;
     private readonly MainWindowViewModel _mainWindowViewModel;
 
@@ -86,7 +87,21 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(DisconnectCommand))]
     [NotifyCanExecuteChangedFor(nameof(SubscribeCommand))]
     [NotifyCanExecuteChangedFor(nameof(PublishCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ToggleRecordingCommand))]
     private ConnectionState _connectionState = ConnectionState.Disconnected;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RecordingButtonText))]
+    [NotifyCanExecuteChangedFor(nameof(ToggleRecordingCommand))]
+    private bool _isRecording;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RecordingButtonText))]
+    private long _recordedCount;
+
+    public string RecordingButtonText => IsRecording
+        ? $"Stop Rec ({RecordedCount:N0})"
+        : "Record SQLite";
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConnectCommand))]
@@ -176,6 +191,7 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
         IBrokerProfileStore brokerProfileStore,
         ISettingsService settingsService,
         IPayloadCodecService payloadCodec,
+        ISessionRecorderService sessionRecorder,
         ISnackbarService snackbarService,
         MainWindowViewModel mainWindowViewModel)
     {
@@ -184,6 +200,7 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
         _brokerProfileStore = brokerProfileStore;
         _settingsService = settingsService;
         _payloadCodec = payloadCodec;
+        _sessionRecorder = sessionRecorder;
         _snackbarService = snackbarService;
         _mainWindowViewModel = mainWindowViewModel;
 
@@ -192,8 +209,11 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
         _mqttClientService.StateChanged += OnMqttStateChanged;
         _mqttClientService.MessageReceived += OnMqttMessageReceived;
         _brokerProfileStore.ProfilesChanged += OnBrokerProfilesChanged;
+        _sessionRecorder.RecordingStateChanged += OnRecorderStateChanged;
+        _sessionRecorder.RecordedCountChanged += OnRecorderCountChanged;
 
         SyncConnectionState(_mqttClientService.State);
+        SyncRecordingState();
         _ = Task.Run(() => RunIncomingDrainLoopAsync(_pumpCts.Token));
     }
 
@@ -272,6 +292,11 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
             await _mqttClientService.ConnectAsync(SelectedBroker);
             await AutoSubscribeDefaultTopicsAsync(SelectedBroker);
 
+            if (_settingsService.Current.AutoRecordOnConnect && !_sessionRecorder.IsRecording)
+            {
+                await _sessionRecorder.StartRecordingAsync(SelectedBroker);
+            }
+
             ShowSnackbar(
                 "Connected",
                 $"Connected to {SelectedBroker.Name} ({SelectedBroker.DisplayUri}).",
@@ -293,12 +318,50 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
     private async Task DisconnectAsync()
     {
         var name = _mqttClientService.ActiveBroker?.Name ?? "broker";
+        if (_sessionRecorder.IsRecording)
+        {
+            var count = _sessionRecorder.RecordedMessageCount;
+            await _sessionRecorder.StopRecordingAsync();
+            ShowSnackbar("Session saved", $"Stopped SQLite recording ({count:N0} messages).", ControlAppearance.Info);
+        }
+
         await _mqttClientService.DisconnectAsync();
         Subscriptions.Clear();
         RebuildTopicFilterOptions();
         _autoSubscribedBrokerId = null;
         ShowSnackbar("Disconnected", $"Disconnected from {name}.", ControlAppearance.Info);
     }
+
+    [RelayCommand(CanExecute = nameof(CanToggleRecording))]
+    private async Task ToggleRecordingAsync()
+    {
+        try
+        {
+            if (_sessionRecorder.IsRecording)
+            {
+                var count = _sessionRecorder.RecordedMessageCount;
+                await _sessionRecorder.StopRecordingAsync();
+                ShowSnackbar("Recording stopped", $"Session saved to SQLite ({count:N0} messages).", ControlAppearance.Info);
+            }
+            else
+            {
+                var broker = _mqttClientService.ActiveBroker ?? SelectedBroker;
+                if (broker is null)
+                {
+                    return;
+                }
+
+                var session = await _sessionRecorder.StartRecordingAsync(broker);
+                ShowSnackbar("Recording started", $"Logging session \"{session.Name}\" to SQLite.", ControlAppearance.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowSnackbar("Recording error", ex.GetBaseException().Message, ControlAppearance.Danger);
+        }
+    }
+
+    private bool CanToggleRecording() => IsRecording || IsConnected;
 
     [RelayCommand(CanExecute = nameof(CanSubscribe))]
     private async Task SubscribeAsync()
@@ -462,6 +525,7 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
                 AccentColorHex = "#3B82F6"
             };
 
+            _sessionRecorder.EnqueueMessage(outbound);
             AppendLogMessagesOnUiThread([outbound]);
         }
         catch (Exception ex)
@@ -517,6 +581,7 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
                 AccentColorHex = accent
             };
 
+            _sessionRecorder.EnqueueMessage(item);
             logItems.Add(item);
         }
 
@@ -810,8 +875,22 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
                 }
 
                 _ = AutoSubscribeDefaultTopicsAsync(active);
+
+                if (_settingsService.Current.AutoRecordOnConnect && !_sessionRecorder.IsRecording)
+                {
+                    _ = _sessionRecorder.StartRecordingAsync(active);
+                }
             }
         });
+    }
+
+    private void OnRecorderStateChanged(object? sender, EventArgs e) => RunOnUiThread(SyncRecordingState);
+    private void OnRecorderCountChanged(object? sender, long count) => RunOnUiThread(SyncRecordingState);
+
+    private void SyncRecordingState()
+    {
+        IsRecording = _sessionRecorder.IsRecording;
+        RecordedCount = _sessionRecorder.RecordedMessageCount;
     }
 
     private void SyncConnectionState(ConnectionState state)
@@ -872,6 +951,8 @@ public sealed partial class ClientViewModel : ObservableObject, IDisposable
         _mqttClientService.StateChanged -= OnMqttStateChanged;
         _mqttClientService.MessageReceived -= OnMqttMessageReceived;
         _brokerProfileStore.ProfilesChanged -= OnBrokerProfilesChanged;
+        _sessionRecorder.RecordingStateChanged -= OnRecorderStateChanged;
+        _sessionRecorder.RecordedCountChanged -= OnRecorderCountChanged;
 
         _incomingChannel.Writer.TryComplete();
         _pumpCts.Cancel();

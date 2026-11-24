@@ -39,6 +39,11 @@ public sealed class EnumDisplayConverter : IValueConverter
             MessageDirectionFilter.Inbound => "Inbound (↓)",
             MessageDirectionFilter.Outbound => "Outbound (↑)",
 
+            SessionDateFilter.AllDates => "All Dates",
+            SessionDateFilter.Today => "Today",
+            SessionDateFilter.Last7Days => "Last 7 Days",
+            SessionDateFilter.Last30Days => "Last 30 Days",
+
             int qos when parameter is string p && p.Equals("QoS", StringComparison.OrdinalIgnoreCase) => qos switch
             {
                 0 => "QoS 0 — At most once",

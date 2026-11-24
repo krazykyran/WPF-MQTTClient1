@@ -13,18 +13,21 @@ public sealed class ApplicationHostService : IHostedService
     private readonly IAppThemeService _themeService;
     private readonly ISettingsService _settingsService;
     private readonly IMqttClientService _mqttClientService;
+    private readonly ISessionRecorderService _sessionRecorderService;
     private INavigationWindow? _navigationWindow;
 
     public ApplicationHostService(
         IServiceProvider serviceProvider,
         IAppThemeService themeService,
         ISettingsService settingsService,
-        IMqttClientService mqttClientService)
+        IMqttClientService mqttClientService,
+        ISessionRecorderService sessionRecorderService)
     {
         _serviceProvider = serviceProvider;
         _themeService = themeService;
         _settingsService = settingsService;
         _mqttClientService = mqttClientService;
+        _sessionRecorderService = sessionRecorderService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -44,6 +47,15 @@ public sealed class ApplicationHostService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        try
+        {
+            await _sessionRecorderService.StopRecordingAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Swallow shutdown errors so the app exits cleanly.
+        }
+
         try
         {
             await _mqttClientService.DisconnectAsync(cancellationToken).ConfigureAwait(false);

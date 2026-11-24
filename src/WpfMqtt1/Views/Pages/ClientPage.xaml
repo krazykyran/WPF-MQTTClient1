@@ -103,12 +103,46 @@
                         TextTrimming="CharacterEllipsis" />
                 </StackPanel>
 
-                <ui:Button
-                    Grid.Column="3"
-                    Command="{Binding ViewModel.OpenBrokersCommand}"
-                    Content="Brokers"
-                    Icon="{ui:SymbolIcon Server20}"
-                    ToolTip="Manage MQTT broker profiles" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <ui:Button
+                        Margin="0,0,8,0"
+                        Command="{Binding ViewModel.ToggleRecordingCommand}"
+                        ToolTip="Toggle recording incoming and outgoing messages to SQLite">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse
+                                Width="8"
+                                Height="8"
+                                Margin="0,0,7,0"
+                                VerticalAlignment="Center"
+                                Fill="#EF4444"
+                                Visibility="{Binding ViewModel.IsRecording, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <ui:SymbolIcon
+                                Margin="0,0,6,0"
+                                FontSize="16"
+                                Symbol="Record20">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ViewModel.IsRecording}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{Binding ViewModel.RecordingButtonText}" />
+                        </StackPanel>
+                    </ui:Button>
+
+                    <ui:Button
+                        Command="{Binding ViewModel.OpenBrokersCommand}"
+                        Content="Brokers"
+                        Icon="{ui:SymbolIcon Server20}"
+                        ToolTip="Manage MQTT broker profiles" />
+                </StackPanel>
             </Grid>
         </ui:Card>
 

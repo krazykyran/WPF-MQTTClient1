@@ -9,6 +9,7 @@ namespace WpfMqtt1.ViewModels;
 public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly IMqttClientService? _mqttClientService;
+    private readonly ISessionRecorderService? _sessionRecorderService;
 
     [ObservableProperty]
     private string _applicationTitle = "WpfMqtt1";
@@ -46,11 +47,22 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
     }
 
-    public MainWindowViewModel(IMqttClientService mqttClientService)
+    public MainWindowViewModel(
+        IMqttClientService mqttClientService,
+        ISessionRecorderService? sessionRecorderService = null)
     {
         _mqttClientService = mqttClientService;
+        _sessionRecorderService = sessionRecorderService;
+
         _mqttClientService.StateChanged += OnMqttStateChanged;
         SyncFromMqttService(_mqttClientService.State);
+
+        if (_sessionRecorderService is not null)
+        {
+            _sessionRecorderService.RecordingStateChanged += OnRecordingChanged;
+            _sessionRecorderService.RecordedCountChanged += OnRecordedCountChanged;
+            SyncFromRecorder();
+        }
     }
 
     [RelayCommand(CanExecute = nameof(IsConnectedOrConnecting))]
@@ -61,20 +73,27 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        if (_sessionRecorderService is { IsRecording: true })
+        {
+            await _sessionRecorderService.StopRecordingAsync();
+        }
+
         await _mqttClientService.DisconnectAsync();
     }
 
     private void OnMqttStateChanged(object? sender, ConnectionState newState)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.HasShutdownStarted && !dispatcher.HasShutdownFinished && !dispatcher.CheckAccess())
-        {
-            dispatcher.BeginInvoke(() => SyncFromMqttService(newState));
-        }
-        else
-        {
-            SyncFromMqttService(newState);
-        }
+        DispatchToUi(() => SyncFromMqttService(newState));
+    }
+
+    private void OnRecordingChanged(object? sender, EventArgs e)
+    {
+        DispatchToUi(SyncFromRecorder);
+    }
+
+    private void OnRecordedCountChanged(object? sender, long count)
+    {
+        DispatchToUi(SyncFromRecorder);
     }
 
     private void SyncFromMqttService(ConnectionState state)
@@ -86,5 +105,33 @@ public sealed partial class MainWindowViewModel : ObservableObject
             : active is not null
                 ? $"{active.Name} ({active.DisplayUri})"
                 : "No broker selected";
+    }
+
+    private void SyncFromRecorder()
+    {
+        if (_sessionRecorderService is null)
+        {
+            IsRecording = false;
+            RecordingStatusText = "Not recording";
+            return;
+        }
+
+        IsRecording = _sessionRecorderService.IsRecording;
+        RecordingStatusText = IsRecording
+            ? $"REC • {_sessionRecorderService.RecordedMessageCount:N0} logged"
+            : "Not recording";
+    }
+
+    private static void DispatchToUi(Action action)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.HasShutdownStarted && !dispatcher.HasShutdownFinished && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(action);
+        }
+        else
+        {
+            action();
+        }
     }
 }

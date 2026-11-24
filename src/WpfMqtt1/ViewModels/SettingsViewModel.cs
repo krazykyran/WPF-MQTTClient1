@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
+using WpfMqtt1.Data;
 using WpfMqtt1.Models;
 using WpfMqtt1.Services;
 
@@ -16,6 +17,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IAppPathsService _pathsService;
     private readonly ISnackbarService _snackbarService;
+    private readonly ISessionRepository? _sessionRepository;
 
     private bool _isSyncing;
     private Task _pendingSaveTask = Task.CompletedTask;
@@ -77,12 +79,14 @@ public sealed partial class SettingsViewModel : ObservableObject
         IAppThemeService themeService,
         ISettingsService settingsService,
         IAppPathsService pathsService,
-        ISnackbarService snackbarService)
+        ISnackbarService snackbarService,
+        ISessionRepository? sessionRepository = null)
     {
         _themeService = themeService;
         _settingsService = settingsService;
         _pathsService = pathsService;
         _snackbarService = snackbarService;
+        _sessionRepository = sessionRepository;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         AppVersion = version is not null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.0";
@@ -194,6 +198,26 @@ public sealed partial class SettingsViewModel : ObservableObject
         catch (Exception ex)
         {
             ShowSnackbar("Could not open folder", ex.Message, ControlAppearance.Danger);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CompactDatabaseAsync()
+    {
+        if (_sessionRepository is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _sessionRepository.CompactDatabaseAsync();
+            RefreshStorageInfo();
+            ShowSnackbar("Database compacted", $"SQLite VACUUM complete ({DatabaseSizeDisplay}).", ControlAppearance.Success);
+        }
+        catch (Exception ex)
+        {
+            ShowSnackbar("Compact failed", ex.GetBaseException().Message, ControlAppearance.Danger);
         }
     }
 

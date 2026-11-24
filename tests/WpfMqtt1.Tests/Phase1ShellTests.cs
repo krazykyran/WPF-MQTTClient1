@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Controls;
+using WpfMqtt1.Data;
 using WpfMqtt1.Models;
 using WpfMqtt1.Services;
 using WpfMqtt1.ViewModels;
@@ -31,6 +32,9 @@ public sealed class Phase1ShellTests
         Assert.NotNull(provider.GetRequiredService<ISettingsService>());
         Assert.NotNull(provider.GetRequiredService<IBrokerProfileStore>());
         Assert.NotNull(provider.GetRequiredService<IPayloadCodecService>());
+        Assert.NotNull(provider.GetRequiredService<ISessionRepository>());
+        Assert.NotNull(provider.GetRequiredService<ISessionRecorderService>());
+        Assert.NotNull(provider.GetRequiredService<IExportService>());
         Assert.NotNull(provider.GetRequiredService<IMqttClientService>());
 
         Assert.NotNull(provider.GetRequiredService<MainWindowViewModel>());

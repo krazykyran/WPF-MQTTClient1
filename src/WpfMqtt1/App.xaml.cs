@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
+using WpfMqtt1.Data;
 using WpfMqtt1.Services;
 using WpfMqtt1.ViewModels;
 using WpfMqtt1.Views;
@@ -38,6 +39,9 @@ public partial class App : Application
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IBrokerProfileStore, BrokerProfileStore>();
         services.AddSingleton<IPayloadCodecService, PayloadCodecService>();
+        services.AddSingleton<ISessionRepository, SqliteSessionRepository>();
+        services.AddSingleton<ISessionRecorderService, SessionRecorderService>();
+        services.AddSingleton<IExportService, ExportService>();
         services.AddSingleton<IMqttClientService, MqttClientService>();
 
         // Shell

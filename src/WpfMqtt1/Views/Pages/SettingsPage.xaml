@@ -195,11 +195,18 @@
                             Text="{Binding ViewModel.HistoryDatabasePath}" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <ui:TextBlock
-                    VerticalAlignment="Center"
-                    Appearance="Secondary"
-                    FontTypography="Caption"
-                    Text="{Binding ViewModel.DatabaseSizeDisplay}" />
+                <StackPanel Orientation="Horizontal">
+                    <ui:TextBlock
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        Appearance="Secondary"
+                        FontTypography="Caption"
+                        Text="{Binding ViewModel.DatabaseSizeDisplay}" />
+                    <ui:Button
+                        Command="{Binding ViewModel.CompactDatabaseCommand}"
+                        Content="Compact (VACUUM)"
+                        Icon="{ui:SymbolIcon ArrowMinimizeVertical20}" />
+                </StackPanel>
             </ui:CardControl>
 
             <!-- About -->

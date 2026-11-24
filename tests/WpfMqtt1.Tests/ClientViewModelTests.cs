@@ -1,7 +1,9 @@
 using System.IO;
 using System.Text;
+using Microsoft.Data.Sqlite;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
+using WpfMqtt1.Data;
 using WpfMqtt1.Models;
 using WpfMqtt1.Services;
 using WpfMqtt1.ViewModels;
@@ -14,6 +16,8 @@ public sealed class ClientViewModelTests : IDisposable
     private readonly AppPathsService _paths;
     private readonly BrokerProfileStore _store;
     private readonly SettingsService _settings;
+    private readonly SqliteSessionRepository _sessionRepo;
+    private readonly SessionRecorderService _recorder;
     private readonly FakeMqttClientService _mqtt;
     private readonly MainWindowViewModel _mainVm;
     private readonly ClientViewModel _vm;
@@ -24,8 +28,10 @@ public sealed class ClientViewModelTests : IDisposable
         _paths = new AppPathsService(_tempDir);
         _store = new BrokerProfileStore(_paths);
         _settings = new SettingsService(_paths, new AppThemeService());
+        _sessionRepo = new SqliteSessionRepository(_paths);
+        _recorder = new SessionRecorderService(_sessionRepo);
         _mqtt = new FakeMqttClientService();
-        _mainVm = new MainWindowViewModel(_mqtt);
+        _mainVm = new MainWindowViewModel(_mqtt, _recorder);
 
         _vm = new ClientViewModel(
             new NavigationService(new NullPageProvider()),
@@ -33,6 +39,7 @@ public sealed class ClientViewModelTests : IDisposable
             _store,
             _settings,
             new PayloadCodecService(),
+            _recorder,
             new SnackbarService(),
             _mainVm);
     }
@@ -168,9 +175,47 @@ public sealed class ClientViewModelTests : IDisposable
         Assert.Equal(100, _mainVm.MessageCount);
     }
 
+    [Fact]
+    public async Task AutoRecordOnConnect_CapturesInboundAndOutboundToSqliteAndStopsOnDisconnect()
+    {
+        _settings.Current.AutoRecordOnConnect = true;
+        var broker = new BrokerProfile { Name = "AutoRec Broker", Host = "localhost" };
+        await _store.UpsertAsync(broker);
+        await _vm.EnsureLoadedAsync();
+
+        await _vm.ConnectCommand.ExecuteAsync(null);
+        Assert.True(_vm.IsRecording);
+        Assert.True(_mainVm.IsRecording);
+
+        _vm.PublishTopic = "lab/cmd";
+        _vm.PublishPayload = "ping";
+        await _vm.PublishCommand.ExecuteAsync(null);
+
+        _vm.ProcessIncomingBatch([
+            new MqttReceivedMessage(DateTimeOffset.UtcNow, "lab/reply", Encoding.UTF8.GetBytes("pong"), 0, false, null)
+        ]);
+
+        await _vm.DisconnectCommand.ExecuteAsync(null);
+        Assert.False(_vm.IsRecording);
+        Assert.False(_mainVm.IsRecording);
+
+        var sessions = await _sessionRepo.GetSessionsAsync();
+        var session = Assert.Single(sessions);
+        Assert.Equal("AutoRec Broker", session.BrokerName);
+        Assert.NotNull(session.EndedAtUtc);
+        Assert.Equal(2, session.MessageCount);
+
+        var logged = await _sessionRepo.GetSessionMessagesAsync(session.Id);
+        Assert.Equal(2, logged.Count);
+        Assert.Equal(MessageDirection.Outbound, logged[0].Direction);
+        Assert.Equal(MessageDirection.Inbound, logged[1].Direction);
+    }
+
     public void Dispose()
     {
         _vm.Dispose();
+        _recorder.Dispose();
+        SqliteConnection.ClearAllPools();
         if (Directory.Exists(_tempDir))
         {
             Directory.Delete(_tempDir, recursive: true);

@@ -49,6 +49,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -114,16 +115,6 @@
                             Appearance="Secondary"
                             FontTypography="Caption"
                             Text="{Binding Message.QosLabel, ElementName=Root}" />
-                    </Border>
-                    <Border
-                        Margin="0,0,6,4"
-                        Padding="6,2"
-                        Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                        CornerRadius="4">
-                        <ui:TextBlock
-                            Appearance="Secondary"
-                            FontTypography="Caption"
-                            Text="{Binding Message.SizeDisplay, ElementName=Root}" />
                     </Border>
                     <Border
                         Margin="0,0,6,4"
@@ -210,10 +201,36 @@
                     Severity="Warning"
                     Visibility="{Binding WarningMessage, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}}" />
 
+                <!-- Payload Label + Size Bar -->
+                <Grid Grid.Row="4" Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Appearance="Secondary"
+                        FontTypography="Caption"
+                        FontWeight="SemiBold"
+                        Text="Payload" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontFamily="Cascadia Mono, Consolas"
+                        FontSize="11.5"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                        <Run Text="Size: " />
+                        <Run Text="{Binding Message.SizeDisplay, ElementName=Root, Mode=OneWay}" />
+                    </TextBlock>
+                </Grid>
+
                 <!-- Payload Content Viewer -->
                 <TextBox
                     x:Name="PayloadTextBox"
-                    Grid.Row="4"
+                    Grid.Row="5"
                     Padding="10"
                     AcceptsReturn="True"
                     Background="{DynamicResource ControlFillColorDefaultBrush}"

@@ -104,6 +104,14 @@ public sealed class LayoutRegressionTests
                 Assert.True(clientPage.ActualHeight > 0 && clientPage.ActualHeight < windowHeight,
                     $"Expected ClientPage height ({clientPage.ActualHeight}) to fit inside window ({windowHeight}).");
 
+                // Also verify HistoryPage loads cleanly and constrains to viewport
+                window.Navigate(typeof(HistoryPage));
+                app.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                var historyPage = provider.GetRequiredService<HistoryPage>();
+                historyPage.UpdateLayout();
+                Assert.True(historyPage.ActualHeight > 0 && historyPage.ActualHeight < windowHeight,
+                    $"Expected HistoryPage height ({historyPage.ActualHeight}) to fit inside window ({windowHeight}).");
+
                 window.Close();
                 app.Dispatcher.InvokeShutdown();
             }
